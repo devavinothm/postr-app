@@ -1,70 +1,138 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet, StatusBar } from 'react-native';
+import { Avatar, IconButton } from 'react-native-paper';
+import { FontAwesome } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function HomeScreen() {
+
+  const initialPosts = [
+    { id: 1, user: 'John Doe', content: 'Just completed a great workout! Feeling amazing.', likes: 56, liked: false },
+    { id: 2, user: 'Jane Smith', content: 'Exploring new ways to improve productivity.', likes: 34, liked: false },
+    { id: 3, user: 'Mike Johnson', content: 'Loving the new React Native update!', likes: 112, liked: false },
+  ];
+
+  const [posts, setPosts] = React.useState(initialPosts);
+
+  const handleLiked = (id) => {
+    setPosts((prevPosts) => {
+      return prevPosts.map((post) => {
+        if (post.id === id) {
+          return {
+            ...post,
+            liked: !post.liked,
+            likes: post.liked ? post.likes - 1 : post.likes + 1,
+          };
+        }
+        return post;
+      });
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#6200EE" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.appName}>Postr</Text>
+        <IconButton
+          icon="bell-outline"
+          color="white"
+          style={styles.notificationIcon}
+          size={24}
+          onPress={() => alert('Notifications')}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+
+      {/* Posts */}
+      <ScrollView style={styles.postsContainer}>
+        {posts.map((post) => (
+          <View key={post.id} style={styles.postCard}>
+            <Text style={styles.postContent}>{post.content}</Text>
+            <View style={styles.postFooter}>
+              <Avatar.Image size={32} source={{ uri: 'https://i.pravatar.cc/150?img=' + post.id }} />
+              <Text style={styles.postUser}>{post.user}</Text>
+              <View style={styles.likesShareContainer}>
+                <View style={styles.likesContainer}>
+                  <FontAwesome
+                    name={post.liked ? 'heart' : 'heart-o'}
+                    size={20}
+                    color={post.liked ? '#FF0000' : '#000'}
+                    onPress={() => handleLiked(post.id)}
+                  />
+                  <Text style={styles.likesText}>{post.likes}</Text>
+                </View>
+
+                {/* Add a share button here */}
+                <AntDesign name="sharealt" size={20} color="black" />
+              </View>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f0f0f0',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#6200EE',
+    padding: 10,
+    marginBottom: 20,
+    borderRadius: 5,
+  },
+  appName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  notificationIcon: {
+    backgroundColor: '#ddd',
+  },
+  postsContainer: {
+    paddingHorizontal: 20,
+  },
+  postCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  postContent: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  postFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  postUser: {
+    fontSize: 14,
+    marginLeft: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  likesShareContainer: {
+    flexDirection: 'row',
+    marginLeft: 'auto',
+  },
+  likesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  likesText: {
+    marginLeft: 5,
   },
 });
